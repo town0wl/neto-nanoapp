@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "nanoapp-chart.fullname" . }}-test-connection"
+  labels:
+    {{- include "nanoapp-chart.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "nanoapp-chart.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
