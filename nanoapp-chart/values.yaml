@@ -11,7 +11,8 @@ image:
   # Set it in .Chart.AppVersion
   tag: ""
 
-imagePullSecrets: []
+imagePullSecrets: 
+- name: k8s-to-cr-pull
 nameOverride: ""
 fullnameOverride: ""
 
