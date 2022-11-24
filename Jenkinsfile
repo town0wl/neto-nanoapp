@@ -1,6 +1,6 @@
 pipeline {
   environment {
-    tag = 'thetagA'
+    tag = 'thetagW'
   }
   agent {
     kubernetes {
