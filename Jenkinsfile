@@ -2,7 +2,7 @@ pipeline {
   agent {
     kubernetes {
       //cloud 'kubernetes'
-      defaultContainer 'jenkins-docker-cfg'
+      defaultContainer 'kaniko'
       yaml '''
         kind: Pod
         spec:
