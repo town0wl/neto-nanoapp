@@ -2,7 +2,7 @@ pipeline {
   agent {
     kubernetes {
       //cloud 'kubernetes'
-      defaultContainer 'kaniko'
+      defaultContainer 'jenkins-docker-cfg'
       yaml '''
         kind: Pod
         spec:
@@ -43,14 +43,6 @@ pipeline {
             )}"""
   }
   stages {
-    stage('Check Tag') {
-      when { tag '' }
-      steps {
-        sh '''env
-        if [ -n "${TAG_NAME}" ]; then printf "this:${TAG_NAME}"; else printf "this:${BUILD_TAG}"; fi
-        '''
-      }
-    }
     stage('Build and push image with Kaniko') {
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
@@ -61,6 +53,7 @@ pipeline {
       }
     }
     stage('Install Test Deploy') {
+      when { not { tag '' } }
       steps {
         container('helm') {
           sh '''helm install nanoapp-test --namespace test --set image.tag=${tagname} ./nanoapp-chart'''
@@ -68,6 +61,7 @@ pipeline {
       }
     }
     stage('Wait') {
+      when { not { tag '' } }
       steps {
           sh '''sleep 10'''
       }
@@ -84,7 +78,7 @@ pipeline {
   post {
     cleanup {
       container('helm') {
-        sh '''helm uninstall nanoapp-test --namespace test'''
+        sh '''helm uninstall nanoapp-test --namespace test || true'''
       }
     }
   }
