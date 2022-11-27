@@ -37,6 +37,17 @@ pipeline {
     }
   }
   stages {
+    stage('Check Tag') {
+      when { tag "*" }
+      steps {
+        sh 'env'
+      }
+    }
+    stage('Env') {
+      steps {
+        sh 'env'
+      }
+    }
     stage('Clone') {
       steps {
         git branch: 'main', url: 'https://github.com/town0wl/neto-nanoapp.git'
