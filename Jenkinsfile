@@ -51,11 +51,6 @@ pipeline {
         '''
       }
     }
-    stage('Clone') {
-      steps {
-        git branch: 'main', url: 'https://github.com/town0wl/neto-nanoapp.git'
-      }
-    }
     stage('Build and push image with Kaniko') {
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
