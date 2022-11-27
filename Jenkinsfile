@@ -44,7 +44,7 @@ pipeline {
   }
   stages {
     stage('Check Tag') {
-      when { tag "*" }
+      when { tag }
       steps {
         sh '''env
         if [ -n "${TAG_NAME}" ]; then printf "this:${TAG_NAME}"; else printf "this:${BUILD_TAG}"; fi
@@ -73,7 +73,7 @@ pipeline {
       }
     }
     stage('Install to App') {
-      when { tag "*" }
+      when { tag }
       steps {
         sh '''helm upgrade --install nanoapp --namespace app --set image.tag=${tagname} ./nanoapp-chart'''
       }
