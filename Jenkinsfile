@@ -1,7 +1,4 @@
 pipeline {
-  environment {
-    tag = 'thetag-27'
-  }
   agent {
     kubernetes {
       //cloud 'kubernetes'
@@ -49,7 +46,7 @@ pipeline {
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
           sh '''#!/busybox/sh
-            /kaniko/executor --verbosity debug --force -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=cr.yandex/crprjg8fv1rv4n557ieq/nanoapp:${tag}
+            /kaniko/executor --verbosity debug --force -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=cr.yandex/crprjg8fv1rv4n557ieq/nanoapp:${BUILD_TAG}
           '''
         }
       }
@@ -57,7 +54,7 @@ pipeline {
     stage('Install Test Deploy') {
       steps {
         container('helm') {
-          sh '''helm install ${tag} --namespace test --set image.tag=${tag} ./nanoapp-chart'''
+          sh '''helm install ${BUILD_TAG} --namespace test --set image.tag=${BUILD_TAG} ./nanoapp-chart'''
         }
       }
     }
@@ -70,7 +67,7 @@ pipeline {
   post {
     cleanup {
       container('helm') {
-        sh '''helm uninstall ${tag} --namespace test'''
+        sh '''helm uninstall ${BUILD_TAG} --namespace test'''
       }
     }
   }
