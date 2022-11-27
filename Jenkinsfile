@@ -75,7 +75,9 @@ pipeline {
     stage('Install to App') {
       when { tag '' }
       steps {
-        sh '''helm upgrade --install nanoapp --namespace app --set image.tag=${tagname} ./nanoapp-chart'''
+        container('helm') {
+          sh '''helm upgrade --install nanoapp --namespace app --set image.tag=${tagname} ./nanoapp-chart'''
+        }  
       }
     }
   }
