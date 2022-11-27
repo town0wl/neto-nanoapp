@@ -36,16 +36,19 @@ pipeline {
 '''
     }
   }
+  environment {
+    tagname = """${sh(
+                returnStdout: true,
+                script: 'if [ -n "${TAG_NAME}" ]; then printf "${TAG_NAME}"; else printf "${BUILD_TAG}"; fi'
+            )}"""
+  }
   stages {
     stage('Check Tag') {
       when { tag "*" }
       steps {
-        sh 'env'
-      }
-    }
-    stage('Env') {
-      steps {
-        sh 'env'
+        sh '''env
+        if [ -n "${TAG_NAME}" ]; then printf "this:${TAG_NAME}"; else printf "this:${BUILD_TAG}"; fi
+        '''
       }
     }
     stage('Clone') {
@@ -57,7 +60,7 @@ pipeline {
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
           sh '''#!/busybox/sh
-            /kaniko/executor --verbosity debug --force -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=cr.yandex/crprjg8fv1rv4n557ieq/nanoapp:${BUILD_TAG}
+            /kaniko/executor --verbosity debug --force -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=cr.yandex/crprjg8fv1rv4n557ieq/nanoapp:${tagname}
           '''
         }
       }
@@ -65,7 +68,7 @@ pipeline {
     stage('Install Test Deploy') {
       steps {
         container('helm') {
-          sh '''helm install ${BUILD_TAG} --namespace test --set image.tag=${BUILD_TAG} ./nanoapp-chart'''
+          sh '''helm install nanoapp-test --namespace test --set image.tag=${tagname} ./nanoapp-chart'''
         }
       }
     }
@@ -74,11 +77,17 @@ pipeline {
           sh '''sleep 10'''
       }
     }
+    stage('Install to App') {
+      when { tag "*" }
+      steps {
+        sh '''helm upgrade --install nanoapp --namespace app --set image.tag=${tagname} ./nanoapp-chart'''
+      }
+    }
   }
   post {
     cleanup {
       container('helm') {
-        sh '''helm uninstall ${BUILD_TAG} --namespace test'''
+        sh '''helm uninstall nanoapp-test --namespace test'''
       }
     }
   }
