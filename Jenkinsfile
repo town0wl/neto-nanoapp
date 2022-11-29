@@ -24,6 +24,13 @@ pipeline {
             - sleep
             args:
             - 99d
+          - name: multitool
+            image: praqma/network-multitool:alpine-extra
+            imagePullPolicy: IfNotPresent
+            command:
+            - sleep
+            args:
+            - 99d
           volumes:
           - name: jenkins-docker-cfg
             projected:
@@ -60,10 +67,14 @@ pipeline {
         }
       }
     }
-    stage('Wait') {
+    stage('Test HTTP') {
       when { not { tag '' } }
       steps {
-          sh '''sleep 10'''
+        container('multitool') {
+          sh '''sleep 10
+            curl http://nanoapp-test-nanoapp-chart.test.svc.public.cluster/
+          '''
+        }
       }
     }
     stage('Install to App') {
