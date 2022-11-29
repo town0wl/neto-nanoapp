@@ -85,6 +85,16 @@ pipeline {
         }  
       }
     }
+    stage('Test Prod in App') {
+      when { tag '' }
+      steps {
+        container('multitool') {
+          sh '''sleep 10
+            curl http://nanoapp-nanoapp-chart.app.svc.public.cluster/
+          '''
+        }
+      }
+    }
   }
   post {
     cleanup {
