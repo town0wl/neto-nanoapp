@@ -14,6 +14,12 @@ pipeline {
             - sleep
             args:
             - 99d
+            env:
+              - name: LOCAL_REGISTRY_ID
+                valueFrom:
+                  configMapKeyRef:
+                    name: registry-id
+                    key: registry-id
             volumeMounts:
               - name: jenkins-docker-cfg
                 mountPath: /kaniko/.docker
@@ -24,6 +30,12 @@ pipeline {
             - sleep
             args:
             - 99d
+            env:
+              - name: LOCAL_REGISTRY_ID
+                valueFrom:
+                  configMapKeyRef:
+                    name: registry-id
+                    key: registry-id
           - name: multitool
             image: praqma/network-multitool:alpine-extra
             imagePullPolicy: IfNotPresent
@@ -54,7 +66,7 @@ pipeline {
       steps {
         container(name: 'kaniko', shell: '/busybox/sh') {
           sh '''#!/busybox/sh
-            /kaniko/executor --verbosity debug --force -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=cr.yandex/crprjg8fv1rv4n557ieq/nanoapp:${tagname}
+            /kaniko/executor --verbosity debug --force -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=cr.yandex/"${LOCAL_REGISTRY_ID}"/nanoapp:${tagname}
           '''
         }
       }
@@ -63,7 +75,7 @@ pipeline {
       when { not { tag '' } }
       steps {
         container('helm') {
-          sh '''helm install nanoapp-test --namespace test --set image.tag=${tagname} ./nanoapp-chart'''
+          sh '''helm install nanoapp-test --namespace test --set image.repository=cr.yandex/"${LOCAL_REGISTRY_ID}"/nanoapp --set image.tag=${tagname} ./nanoapp-chart'''
         }
       }
     }
@@ -81,7 +93,7 @@ pipeline {
       when { tag '' }
       steps {
         container('helm') {
-          sh '''helm upgrade --install nanoapp --namespace app --set image.tag=${tagname} ./nanoapp-chart'''
+          sh '''helm upgrade --install nanoapp --namespace app --set image.repository=cr.yandex/"${LOCAL_REGISTRY_ID}"/nanoapp --set image.tag=${tagname} ./nanoapp-chart'''
         }  
       }
     }
