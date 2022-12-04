@@ -75,7 +75,7 @@ pipeline {
       when { not { tag '' } }
       steps {
         container('helm') {
-          sh '''helm install nanoapp-test --namespace test --set image.repository=cr.yandex/"${LOCAL_REGISTRY_ID}"/nanoapp --set image.tag=${tagname} --set 'ingress.hosts[0].host=test.chart-example.local,ingress.hosts[0].paths[0].path=/,ingress.hosts[0].paths[0].pathType=Prefix' ./nanoapp-chart'''
+          sh '''helm install nanoapp-test --namespace test --set image.repository=cr.yandex/"${LOCAL_REGISTRY_ID}"/nanoapp --set image.tag=${tagname} --set 'ingress.hosts[0].host=test.leto131.ru,ingress.hosts[0].paths[0].path=/,ingress.hosts[0].paths[0].pathType=Prefix' ./nanoapp-chart'''
         }
       }
     }
